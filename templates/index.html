@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en,zh">
+<head>
+	<title>车辆识别及检测</title>
+	<meta charset="utf-8">
+	<!-- jquery 3.3.1 cdn -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+
+	<div style="border:2px dotted black;">
+        <p>图片上传前预览：
+        	<input type="file" id="xdaTanFileImg" onchange="xmTanUploadImg(this)" accept="image/*"/>
+        	<input type="button" onclick="return objectDetect(this)" value="车辆检测">
+<!--             <input type="button" value="隐藏图片" onclick="document.getElementById('xmTanImg').style.display = 'none';"/>
+            <input type="button" value="显示图片" onclick="document.getElementById('xmTanImg').style.display = 'block';"/> -->
+        </p>
+		<hr>
+		<div id="xmTanDiv"></div>
+        <img id="xmTanImg" style="display: block; width: 500px;">
+        <br>
+        <img id="detectResult" style="display: block; width: 500px;">
+        <div id="base64Container" style="word-break:break-all;word-wrap:break-word;overflow:auto;"></div>
+    </div>
+        
+
+    <script type="text/javascript">            
+        //判断浏览器是否支持FileReader接口
+        if (typeof FileReader == 'undefined') {
+            document.getElementById("xmTanDiv").innerHTML = "<h1>当前浏览器不支持FileReader接口</h1>";
+            //使选择控件不可操作
+            document.getElementById("xdaTanFileImg").setAttribute("disabled", "disabled");
+        }
+
+        // 车辆检测
+        function objectDetect(obj){
+        	file = document.getElementById("xmTanImg").src
+        	// document.getElementById("base64Container").innerHTML = file;
+        	// document.getElementById("base64Container").style.height = '200px';
+
+			// 提交数据
+			//提交json数据
+			$(document).ready(function () {
+			    $.ajax({
+			        type: "POST",
+			        url: "{{ url_for('detect') }}",
+			        contentType: "application/json;charset=utf-8",
+			        data:JSON.stringify({"base64":file}),
+			        dataType: "json",
+			        success:function (message) {
+			            var img = document.getElementById("detectResult");
+			            img.src = message.img
+			        	// alert("提交成功"+JSON.stringify(message));
+			        },
+			        error:function (message) {
+			            alert("提交失败"+JSON.stringify(message));
+			        }
+			    });
+			 });
+        }
+
+
+        // 选择图片，马上预览
+        function xmTanUploadImg(obj) {
+            var file = obj.files[0];
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                console.log("成功读取....");
+
+                var img = document.getElementById("xmTanImg");
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file)
+        }
+    </script>
+		
+</body>
+</html>
